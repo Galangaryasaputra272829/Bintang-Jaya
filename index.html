@@ -1,0 +1,986 @@
+
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BINTANG JAYA KOMPUTER - Pusat Grosir & Dealer Laptop</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                            950: '#450a0a',
+                        },
+                        dark: {
+                            bg: '#0a0a0c',
+                            card: '#121216',
+                            border: '#22222a',
+                            input: '#1a1a22',
+                            hover: '#262632'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- AlpineJS for Dynamic Reactivity -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0c;
+            color: #f3f4f6;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #dc2626;
+        }
+        .glow-red {
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.25);
+        }
+        .glow-red-sm {
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.15);
+        }
+    </style>
+</head>
+<body x-data="laptopApp()" x-init="initApp()" class="min-h-screen flex flex-col bg-dark-bg text-gray-100 antialiased selection:bg-brand-600 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-dark-card/90 backdrop-blur-md border-b border-dark-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Brand Name -->
+                <div class="flex items-center space-x-3 cursor-pointer" @click="currentTab = 'dealer'">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-600 to-brand-900 flex items-center justify-center text-white shadow-lg glow-red-sm font-bold text-xl border border-brand-500/30">
+                        <i class="fa-solid font-black fa-star text-amber-300"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-xl tracking-wider text-white uppercase">BINTANG JAYA</span>
+                            <span class="bg-brand-600/20 text-brand-500 text-[10px] font-bold px-2 py-0.5 rounded border border-brand-500/30 tracking-widest">GROSIR</span>
+                        </div>
+                        <p class="text-xs text-gray-400 font-medium">Pusat Grosir & Supplier Laptop Dealer</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls & View Toggles -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    
+                    <!-- Mode Switcher Tabs -->
+                    <div class="bg-dark-input p-1 rounded-xl border border-dark-border flex items-center">
+                        <button 
+                            @click="currentTab = 'dealer'"
+                            :class="currentTab === 'dealer' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-white'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span class="hidden sm:inline">Katalog</span> Dealer
+                        </button>
+                        <button 
+                            @click="switchToAdmin()"
+                            :class="currentTab === 'admin' ? 'bg-brand-600 text-white shadow-md' : 'text-gray-400 hover:text-white'"
+                            class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>Dashboard <span class="hidden sm:inline">Bos</span></span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Broadcast Copy Button -->
+                    <button 
+                        @click="copyStockBroadcast()"
+                        title="Salin Daftar Stok untuk Broadcast WA"
+                        class="bg-dark-input hover:bg-dark-hover text-gray-300 hover:text-white p-2.5 rounded-xl border border-dark-border transition-all flex items-center justify-center">
+                        <i class="fa-solid fa-share-nodes text-brand-500"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28">
+
+        <!-- Announcement / Dealer Banner -->
+        <div class="mb-6 rounded-2xl bg-gradient-to-r from-red-950/60 via-dark-card to-dark-card border border-brand-900/40 p-4 sm:p-5 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3 z-10">
+                <div class="p-2.5 bg-brand-600/20 text-brand-500 rounded-xl border border-brand-500/30 flex-shrink-0">
+                    <i class="fa-solid fa-bullhorn text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                        <span>Sistem Pengambilan Stok Khusus Reseller & Dealer</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span> Stok Live
+                        </span>
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Pilih unit yang dibutuhkan, lalu klik <span class="text-brand-500 font-semibold">"Ambil via WA"</span> untuk nego harga modal & pengiriman kargo.</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 z-10 self-end md:self-auto text-xs">
+                <div class="bg-dark-input px-3 py-1.5 rounded-lg border border-dark-border text-gray-300">
+                    Total Ready: <span class="text-white font-bold" x-text="getTotalUnitCount() + ' Unit'"></span>
+                </div>
+                <div class="bg-dark-input px-3 py-1.5 rounded-lg border border-dark-border text-gray-300">
+                    Model: <span class="text-white font-bold" x-text="laptops.length + ' Tipe'"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 1: DEALER CATALOG VIEW ==================== -->
+        <div x-show="currentTab === 'dealer'" class="space-y-6">
+
+            <!-- Filter & Search Controls -->
+            <div class="bg-dark-card rounded-2xl p-4 border border-dark-border space-y-4 shadow-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    
+                    <!-- Search Input -->
+                    <div class="relative lg:col-span-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                        <input 
+                            type="text" 
+                            x-model="searchQuery" 
+                            placeholder="Cari Tipe (ex: ThinkPad, i5, Gen 8)..." 
+                            class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl pl-10 pr-8 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none transition-all">
+                        <button x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-xs">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Filter Brand -->
+                    <div>
+                        <select x-model="filterBrand" class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white outline-none transition-all">
+                            <option value="">Semua Merek / Brand</option>
+                            <template x-for="brand in getBrands()" :key="brand">
+                                <option :value="brand" x-text="brand"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Filter Grade/Kondisi -->
+                    <div>
+                        <select x-model="filterGrade" class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white outline-none transition-all">
+                            <option value="">Semua Kondisi / Grade</option>
+                            <option value="BNIB / Baru">BNIB / Baru</option>
+                            <option value="Grade A Mulus">Grade A Mulus</option>
+                            <option value="Grade B (Minus Halus)">Grade B (Minus Halus)</option>
+                            <option value="Ex-Office Garansi">Ex-Office Garansi</option>
+                        </select>
+                    </div>
+
+                    <!-- Reset & Select All Actions -->
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="resetFilters()" 
+                            class="flex-1 bg-dark-input hover:bg-dark-hover text-gray-400 hover:text-white py-2.5 px-3 rounded-xl border border-dark-border text-xs font-medium transition-all flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rotate"></i> Reset
+                        </button>
+                        <button 
+                            @click="clearSelected()" 
+                            x-show="selectedItems.length > 0"
+                            class="bg-brand-950/50 hover:bg-brand-900/80 text-brand-400 border border-brand-800/50 py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i> Lepas Pilihan (<span x-text="selectedItems.length"></span>)
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Laptop Stock Table Matrix (Desktop & Mobile) -->
+            <div class="bg-dark-card rounded-2xl border border-dark-border overflow-hidden shadow-2xl">
+                
+                <!-- Table View for Desktop & Tablet -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-300">
+                        <thead class="bg-dark-input/80 text-xs uppercase tracking-wider text-gray-400 border-b border-dark-border">
+                            <tr>
+                                <th class="p-4 text-center w-12">
+                                    <span class="sr-only">Pilih</span>
+                                </th>
+                                <th class="p-4">Unit Laptop</th>
+                                <th class="p-4">Spesifikasi Detail</th>
+                                <th class="p-4 text-center">Grade / Kondisi</th>
+                                <th class="p-4 text-center">Stok Ready</th>
+                                <th class="p-4 text-center">Jumlah Ambil</th>
+                                <th class="p-4 text-right">Opsi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-dark-border">
+                            
+                            <!-- Empty State -->
+                            <template x-if="filteredLaptops.length === 0">
+                                <tr>
+                                    <td colspan="7" class="p-12 text-center text-gray-500">
+                                        <i class="fa-solid fa-laptop-code text-4xl mb-3 text-dark-border"></i>
+                                        <p class="text-base font-medium text-gray-400">Tidak ada stok laptop yang sesuai filter.</p>
+                                        <p class="text-xs text-gray-600 mt-1">Coba ubah kata kunci pencarian atau reset filter.</p>
+                                    </td>
+                                </tr>
+                            </template>
+
+                            <!-- Laptop Item Row -->
+                            <template x-for="item in filteredLaptops" :key="item.id">
+                                <tr 
+                                    :class="isSelected(item.id) ? 'bg-brand-950/20 border-l-4 border-l-brand-600' : 'hover:bg-dark-hover/50'"
+                                    class="transition-colors duration-150">
+                                    
+                                    <!-- Checkbox Multi-select -->
+                                    <td class="p-4 text-center">
+                                        <input 
+                                            type="checkbox" 
+                                            :checked="isSelected(item.id)" 
+                                            @change="toggleSelect(item)"
+                                            :disabled="item.stock <= 0"
+                                            class="w-4 h-4 rounded bg-dark-input border-dark-border text-brand-600 focus:ring-brand-500 focus:ring-offset-dark-bg cursor-pointer disabled:opacity-30">
+                                    </td>
+
+                                    <!-- Laptop Name & Brand -->
+                                    <td class="p-4 font-semibold text-white">
+                                        <div class="flex items-center gap-2">
+                                            <span x-text="item.name"></span>
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[10px] bg-dark-input px-2 py-0.5 rounded text-gray-400 border border-dark-border font-mono uppercase" x-text="item.brand"></span>
+                                            <span x-show="item.notes" class="text-[10px] text-amber-400/90 italic font-normal" x-text="'Catatan: ' + item.notes"></span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Specifications -->
+                                    <td class="p-4">
+                                        <div class="text-xs text-gray-300 font-mono leading-relaxed" x-text="item.specs"></div>
+                                    </td>
+
+                                    <!-- Grade / Kondisi Badge -->
+                                    <td class="p-4 text-center whitespace-nowrap">
+                                        <span 
+                                            :class="{
+                                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/30': item.grade.includes('BNIB') || item.grade.includes('Mulus'),
+                                                'bg-amber-500/10 text-amber-400 border-amber-500/30': item.grade.includes('Grade B'),
+                                                'bg-blue-500/10 text-blue-400 border-blue-500/30': item.grade.includes('Ex-Office')
+                                            }"
+                                            class="px-2.5 py-1 rounded-full text-[11px] font-semibold border inline-block"
+                                            x-text="item.grade">
+                                        </span>
+                                    </td>
+
+                                    <!-- Stock Counter Badge -->
+                                    <td class="p-4 text-center whitespace-nowrap">
+                                        <template x-if="item.stock > 0">
+                                            <span class="px-2.5 py-1 rounded-lg bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 font-bold text-xs">
+                                                <i class="fa-solid fa-boxes-stacked mr-1 text-[10px]"></i> <span x-text="item.stock"></span> Unit
+                                            </span>
+                                        </template>
+                                        <template x-if="item.stock <= 0">
+                                            <span class="px-2.5 py-1 rounded-lg bg-red-950/40 text-red-400 border border-red-800/40 font-bold text-xs">
+                                                HABIS
+                                            </span>
+                                        </template>
+                                    </td>
+
+                                    <!-- Quantity Input for Dealer -->
+                                    <td class="p-4 text-center whitespace-nowrap">
+                                        <div class="inline-flex items-center bg-dark-input rounded-lg border border-dark-border p-1" x-show="isSelected(item.id)">
+                                            <button 
+                                                @click="updateQty(item.id, -1)" 
+                                                class="w-6 h-6 rounded bg-dark-card hover:bg-dark-hover text-gray-300 flex items-center justify-center text-xs font-bold transition">
+                                                -
+                                            </button>
+                                            <span class="w-8 text-center text-xs font-bold text-white" x-text="getItemQty(item.id)"></span>
+                                            <button 
+                                                @click="updateQty(item.id, 1)" 
+                                                class="w-6 h-6 rounded bg-dark-card hover:bg-dark-hover text-gray-300 flex items-center justify-center text-xs font-bold transition">
+                                                +
+                                            </button>
+                                        </div>
+                                        <span x-show="!isSelected(item.id)" class="text-xs text-gray-600 italic">Centang dulu</span>
+                                    </td>
+
+                                    <!-- Quick Action Button -->
+                                    <td class="p-4 text-right whitespace-nowrap">
+                                        <button 
+                                            @click="toggleSelect(item)"
+                                            :disabled="item.stock <= 0"
+                                            :class="isSelected(item.id) ? 'bg-brand-600 text-white' : 'bg-dark-input text-gray-300 hover:text-white hover:bg-dark-hover'"
+                                            class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-dark-border transition-all flex items-center justify-end gap-1.5 ml-auto disabled:opacity-30">
+                                            <i x-show="!isSelected(item.id)" class="fa-solid fa-plus text-brand-500"></i>
+                                            <i x-show="isSelected(item.id)" class="fa-solid fa-check text-emerald-400"></i>
+                                            <span x-text="isSelected(item.id) ? 'Terpilih' : 'Pilih'"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================== TAB 2: ADMIN / BOS DASHBOARD ==================== -->
+        <div x-show="currentTab === 'admin'" class="space-y-6">
+
+            <!-- Admin Header Banner -->
+            <div class="bg-gradient-to-r from-dark-card via-brand-950/20 to-dark-card p-6 rounded-2xl border border-brand-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-brand-500"></i> Dashboard Pengelolaan Stok Bos
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1">Isi stok langsung dari web tanpa perlu buka Excel. Perubahan akan langsung update di layar Dealer.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button 
+                        @click="openSettingsModal = true"
+                        class="bg-dark-input hover:bg-dark-hover text-gray-200 border border-dark-border px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-gears text-brand-500"></i> Set No. WA (<span x-text="whatsappNumber"></span>)
+                    </button>
+                    <button 
+                        @click="resetToDefaultData()" 
+                        class="bg-dark-input hover:bg-red-950/30 text-red-400 border border-dark-border hover:border-red-900/50 px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset Sample Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Add / Edit Form Panel -->
+                <div class="bg-dark-card p-5 rounded-2xl border border-dark-border space-y-4 lg:col-span-1 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-dark-border pb-3">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid" :class="isEditing ? 'fa-pen-to-square text-amber-400' : 'fa-circle-plus text-brand-500'"></i>
+                            <span x-text="isEditing ? 'Edit Data Laptop' : 'Tambah Laptop Baru'"></span>
+                        </h3>
+                        <button x-show="isEditing" @click="cancelEdit()" class="text-xs text-gray-400 hover:text-white">
+                            Batal
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="saveLaptop()" class="space-y-3">
+                        
+                        <!-- Laptop Name -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Nama Laptop / Tipe *</label>
+                            <input 
+                                type="text" 
+                                x-model="form.name" 
+                                required 
+                                placeholder="cth: Lenovo ThinkPad T480" 
+                                class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                        </div>
+
+                        <!-- Brand & Grade Grid -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Merek / Brand *</label>
+                                <select 
+                                    x-model="form.brand" 
+                                    required 
+                                    class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                                    <option value="Lenovo">Lenovo</option>
+                                    <option value="ASUS">ASUS</option>
+                                    <option value="Dell">Dell</option>
+                                    <option value="HP">HP</option>
+                                    <option value="Acer">Acer</option>
+                                    <option value="Apple">Apple</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Grade / Kondisi *</label>
+                                <select 
+                                    x-model="form.grade" 
+                                    required 
+                                    class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                                    <option value="Grade A Mulus">Grade A Mulus</option>
+                                    <option value="BNIB / Baru">BNIB / Baru</option>
+                                    <option value="Grade B (Minus Halus)">Grade B (Minus Halus)</option>
+                                    <option value="Ex-Office Garansi">Ex-Office Garansi</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Specs Detail -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Spesifikasi Detail *</label>
+                            <textarea 
+                                x-model="form.specs" 
+                                rows="3" 
+                                required 
+                                placeholder="cth: Core i5-8350U | RAM 8GB | SSD 256GB | Layar 14 FHD | Keyboard Backlight" 
+                                class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none resize-none"></textarea>
+                        </div>
+
+                        <!-- Initial Stock & Notes -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Jumlah Stok (Unit) *</label>
+                                <input 
+                                    type="number" 
+                                    x-model.number="form.stock" 
+                                    min="0" 
+                                    required 
+                                    class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1">Catatan Tambahan</label>
+                                <input 
+                                    type="text" 
+                                    x-model="form.notes" 
+                                    placeholder="cth: Unit di Rak B" 
+                                    class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg glow-red-sm flex items-center justify-center gap-2 mt-2">
+                            <i class="fa-solid" :class="isEditing ? 'fa-check' : 'fa-plus'"></i>
+                            <span x-text="isEditing ? 'Simpan Perubahan' : 'Simpan ke Stok Web'"></span>
+                        </button>
+
+                    </form>
+                </div>
+
+                <!-- Admin Laptop List Table & Quick Stock Management -->
+                <div class="bg-dark-card p-5 rounded-2xl border border-dark-border lg:col-span-2 space-y-4 shadow-xl">
+                    <div class="flex items-center justify-between border-b border-dark-border pb-3">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-brand-500"></i> Kelola Jumlah Stok Real-Time
+                        </h3>
+                        <span class="text-xs text-gray-400" x-text="laptops.length + ' Model Terdaftar'"></span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-gray-300">
+                            <thead class="bg-dark-input/80 uppercase text-[10px] text-gray-400 border-b border-dark-border">
+                                <tr>
+                                    <th class="p-3">Laptop & Specs</th>
+                                    <th class="p-3 text-center">Grade</th>
+                                    <th class="p-3 text-center">Update Stok</th>
+                                    <th class="p-3 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-dark-border">
+                                <template x-for="item in laptops" :key="item.id">
+                                    <tr class="hover:bg-dark-hover/40 transition">
+                                        <td class="p-3">
+                                            <div class="font-bold text-white" x-text="item.name"></div>
+                                            <div class="text-[11px] text-gray-400 font-mono truncate max-w-xs" x-text="item.specs"></div>
+                                        </td>
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-dark-input border border-dark-border text-gray-300" x-text="item.grade"></span>
+                                        </td>
+                                        <!-- Quick Adjust Stock Buttons -->
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <div class="inline-flex items-center bg-dark-input rounded-lg border border-dark-border p-1">
+                                                <button 
+                                                    @click="quickAdjustStock(item.id, -1)" 
+                                                    class="w-6 h-6 rounded bg-dark-card hover:bg-dark-hover text-red-400 flex items-center justify-center font-bold text-xs transition">
+                                                    -
+                                                </button>
+                                                <span class="w-10 text-center font-bold text-white text-xs" x-text="item.stock"></span>
+                                                <button 
+                                                    @click="quickAdjustStock(item.id, 1)" 
+                                                    class="w-6 h-6 rounded bg-dark-card hover:bg-dark-hover text-emerald-400 flex items-center justify-center font-bold text-xs transition">
+                                                    +
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <!-- Actions (Edit/Delete) -->
+                                        <td class="p-3 text-right whitespace-nowrap">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <button 
+                                                    @click="editLaptop(item)" 
+                                                    title="Edit Laptop" 
+                                                    class="p-1.5 rounded-lg bg-dark-input hover:bg-dark-hover text-amber-400 border border-dark-border">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button 
+                                                    @click="deleteLaptop(item.id)" 
+                                                    title="Hapus Laptop" 
+                                                    class="p-1.5 rounded-lg bg-dark-input hover:bg-red-950/50 text-red-400 border border-dark-border">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Floating Bottom Drawer (Selected Items & WA Checkout) -->
+    <div 
+        x-show="selectedItems.length > 0 && currentTab === 'dealer'" 
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="translate-y-full opacity-0"
+        x-transition:enter-end="translate-y-0 opacity-100"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="translate-y-0 opacity-100"
+        x-transition:leave-end="translate-y-full opacity-0"
+        class="fixed bottom-0 left-0 right-0 z-50 bg-dark-card/95 backdrop-blur-xl border-t-2 border-brand-600 p-4 shadow-2xl">
+        
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            <!-- Summary Left -->
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <div class="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-500/30 text-brand-500 flex items-center justify-center flex-shrink-0 font-bold">
+                    <i class="fa-solid fa-cart-flatbed text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 font-medium">Stok Terpilih:</div>
+                    <div class="text-sm font-bold text-white">
+                        <span x-text="selectedItems.length" class="text-brand-500"></span> Model Laptop 
+                        <span class="text-gray-400 font-normal">| Total</span> 
+                        <span x-text="getTotalSelectedUnits()" class="text-emerald-400"></span> Unit
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons Right -->
+            <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                <button 
+                    @click="copySelectedText()" 
+                    class="flex-1 sm:flex-none bg-dark-input hover:bg-dark-hover text-gray-200 border border-dark-border px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-copy text-brand-500"></i> Salin Pesanan
+                </button>
+                <button 
+                    @click="checkoutWhatsApp()" 
+                    class="flex-1 sm:flex-none bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Ambil / Tanya Harga via WA</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- WhatsApp Settings Modal -->
+    <div 
+        x-show="openSettingsModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        x-cloak>
+        <div class="bg-dark-card border border-dark-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-dark-border pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-emerald-500"></i> Pengaturan Nomor WhatsApp Bos
+                </h3>
+                <button @click="openSettingsModal = false" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1">Nomor WhatsApp Admin / Bos</label>
+                <input 
+                    type="text" 
+                    x-model="whatsappNumber" 
+                    placeholder="Contoh: 6281234567890" 
+                    class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
+                <p class="text-[11px] text-gray-500 mt-1">Gunakan format internasional tanpa tanda + (contoh: 6281234567890).</p>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button 
+                    @click="openSettingsModal = false" 
+                    class="px-4 py-2 rounded-xl bg-dark-input border border-dark-border text-gray-300 text-xs font-semibold">
+                    Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div 
+        x-show="toast.show" 
+        x-transition
+        class="fixed top-24 right-5 z-50 bg-dark-card border border-brand-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-semibold">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span x-text="toast.message"></span>
+    </div>
+
+    <!-- Alpine.js Application Logic -->
+    <script>
+        function laptopApp() {
+            return {
+                currentTab: 'dealer', // 'dealer' or 'admin'
+                whatsappNumber: '6281234567890', // Default phone number
+                openSettingsModal: false,
+                searchQuery: '',
+                filterBrand: '',
+                filterGrade: '',
+
+                toast: {
+                    show: false,
+                    message: ''
+                },
+
+                // Selected items for B2B ordering: [{ id, qty }]
+                selectedItems: [],
+
+                // Admin Form State
+                isEditing: false,
+                form: {
+                    id: null,
+                    name: '',
+                    brand: 'Lenovo',
+                    specs: '',
+                    grade: 'Grade A Mulus',
+                    stock: 5,
+                    notes: ''
+                },
+
+                // Default B2B Laptop Inventory
+                laptops: [
+                    {
+                        id: 1,
+                        name: 'Lenovo ThinkPad T480',
+                        brand: 'Lenovo',
+                        specs: 'Core i5-8350U | RAM 8GB DDR4 | SSD 256GB NVMe | Layar 14" FHD IPS | Dual Battery',
+                        grade: 'Grade A Mulus',
+                        stock: 8,
+                        notes: 'Keyboard Mulus, Ex-Office Import'
+                    },
+                    {
+                        id: 2,
+                        name: 'Dell Latitude 5490',
+                        brand: 'Dell',
+                        specs: 'Core i5-8250U | RAM 16GB DDR4 | SSD 512GB NVMe | Layar 14" HD | Intel UHD 620',
+                        grade: 'Grade A Mulus',
+                        stock: 5,
+                        notes: 'Baterai Awet 3-4 Jam'
+                    },
+                    {
+                        id: 3,
+                        name: 'HP EliteBook 840 G5',
+                        brand: 'HP',
+                        specs: 'Core i7-8550U | RAM 16GB | SSD 512GB | Layar 14" FHD | Body Slim Alumunium',
+                        grade: 'Grade A Mulus',
+                        stock: 3,
+                        notes: 'Audio Bang & Olufsen'
+                    },
+                    {
+                        id: 4,
+                        name: 'ASUS Vivobook Go 14',
+                        brand: 'ASUS',
+                        specs: 'Ryzen 3 7320U | RAM 8GB LPDDR5 | SSD 512GB NVMe | Layar 14" FHD | Garansi Resmi',
+                        grade: 'BNIB / Baru',
+                        stock: 12,
+                        notes: 'Segel Dus BNIB'
+                    },
+                    {
+                        id: 5,
+                        name: 'Lenovo IdeaPad Slim 3',
+                        brand: 'Lenovo',
+                        specs: 'Core i3-1215U | RAM 8GB DDR4 | SSD 512GB | Layar 14" FHD | Intel UHD',
+                        grade: 'Ex-Office Garansi',
+                        stock: 4,
+                        notes: 'Kelengkapan Fullset Box'
+                    },
+                    {
+                        id: 6,
+                        name: 'Apple MacBook Air M1 (2020)',
+                        brand: 'Apple',
+                        specs: 'Apple M1 Chip 8-Core CPU | RAM 8GB | SSD 256GB | Retina Display 13.3" | Space Gray',
+                        grade: 'Grade A Mulus',
+                        stock: 2,
+                        notes: 'CC Low 40x, Mulus No Dent'
+                    },
+                    {
+                        id: 7,
+                        name: 'Acer Aspire 5 A515',
+                        brand: 'Acer',
+                        specs: 'Core i5-1135G7 | RAM 8GB DDR4 | SSD 512GB | VGA Nvidia MX350 2GB | Layar 15.6"',
+                        grade: 'Grade B (Minus Halus)',
+                        stock: 3,
+                        notes: 'Ada baret pemakaian di casing luar'
+                    }
+                ],
+
+                initApp() {
+                    // Load saved inventory from localStorage if available
+                    const savedData = localStorage.getItem('bj_laptop_inventory');
+                    if (savedData) {
+                        try {
+                            this.laptops = JSON.parse(savedData);
+                        } catch (e) {
+                            console.error('Error parsing localStorage', e);
+                        }
+                    }
+
+                    const savedWA = localStorage.getItem('bj_wa_number');
+                    if (savedWA) {
+                        this.whatsappNumber = savedWA;
+                    }
+
+                    this.$watch('laptops', (val) => {
+                        localStorage.setItem('bj_laptop_inventory', JSON.stringify(val));
+                    });
+
+                    this.$watch('whatsappNumber', (val) => {
+                        localStorage.setItem('bj_wa_number', val);
+                    });
+                },
+
+                showToast(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 3000);
+                },
+
+                // Switch to admin view
+                switchToAdmin() {
+                    this.currentTab = 'admin';
+                },
+
+                // Filters
+                getBrands() {
+                    const brands = this.laptops.map(l => l.brand);
+                    return [...new Set(brands)];
+                },
+
+                get filteredLaptops() {
+                    return this.laptops.filter(item => {
+                        const query = this.searchQuery.toLowerCase();
+                        const matchesSearch = item.name.toLowerCase().includes(query) ||
+                                              item.specs.toLowerCase().includes(query) ||
+                                              item.brand.toLowerCase().includes(query);
+                        
+                        const matchesBrand = this.filterBrand === '' || item.brand === this.filterBrand;
+                        const matchesGrade = this.filterGrade === '' || item.grade === this.filterGrade;
+
+                        return matchesSearch && matchesBrand && matchesGrade;
+                    });
+                },
+
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.filterBrand = '';
+                    this.filterGrade = '';
+                },
+
+                getTotalUnitCount() {
+                    return this.laptops.reduce((acc, curr) => acc + (parseInt(curr.stock) || 0), 0);
+                },
+
+                // Selection Logic for Dealers
+                isSelected(id) {
+                    return this.selectedItems.some(item => item.id === id);
+                },
+
+                toggleSelect(laptop) {
+                    if (laptop.stock <= 0) return;
+                    
+                    const index = this.selectedItems.findIndex(item => item.id === laptop.id);
+                    if (index > -1) {
+                        this.selectedItems.splice(index, 1);
+                    } else {
+                        this.selectedItems.push({
+                            id: laptop.id,
+                            qty: 1
+                        });
+                    }
+                },
+
+                clearSelected() {
+                    this.selectedItems = [];
+                },
+
+                getItemQty(id) {
+                    const item = this.selectedItems.find(i => i.id === id);
+                    return item ? item.qty : 1;
+                },
+
+                updateQty(id, delta) {
+                    const item = this.selectedItems.find(i => i.id === id);
+                    const laptop = this.laptops.find(l => l.id === id);
+                    if (item && laptop) {
+                        const newQty = item.qty + delta;
+                        if (newQty > 0 && newQty <= laptop.stock) {
+                            item.qty = newQty;
+                        } else if (newQty > laptop.stock) {
+                            this.showToast(`Stok maksimal ready hanya ${laptop.stock} unit`);
+                        }
+                    }
+                },
+
+                getTotalSelectedUnits() {
+                    return this.selectedItems.reduce((acc, curr) => acc + curr.qty, 0);
+                },
+
+                // Format WhatsApp Text for Wholesale Dealer
+                formatWhatsAppMessage() {
+                    let text = `Halo Bos *BINTANG JAYA KOMPUTER*,\nSaya mau tanya harga modal / ambil stok laptop berikut:\n\n`;
+                    
+                    this.selectedItems.forEach((sel, idx) => {
+                        const laptop = this.laptops.find(l => l.id === sel.id);
+                        if (laptop) {
+                            text += `${idx + 1}. *${laptop.name}*\n`;
+                            text += `   • Spek: ${laptop.specs}\n`;
+                            text += `   • Grade: ${laptop.grade}\n`;
+                            text += `   • *Jumlah Ambil: ${sel.qty} Unit*\n\n`;
+                        }
+                    });
+
+                    text += `Apakah ready dan berapa harga pasnya jika ambil partai? Mohon info lokasi kargo/pengirimannya. Terima kasih!`;
+                    return encodeURIComponent(text);
+                },
+
+                checkoutWhatsApp() {
+                    if (this.selectedItems.length === 0) return;
+                    const encodedMsg = this.formatWhatsAppMessage();
+                    const url = `https://wa.me/${this.whatsappNumber}?text=${encodedMsg}`;
+                    window.open(url, '_blank');
+                },
+
+                copySelectedText() {
+                    if (this.selectedItems.length === 0) return;
+                    let text = `*DAFTAR AMBIL STOK LAPTOP (DEALER)*\n\n`;
+                    this.selectedItems.forEach((sel, idx) => {
+                        const laptop = this.laptops.find(l => l.id === sel.id);
+                        if (laptop) {
+                            text += `${idx + 1}. ${laptop.name} (${laptop.grade}) - ${sel.qty} Unit\n`;
+                            text += `   ${laptop.specs}\n`;
+                        }
+                    });
+                    
+                    this.copyToClipboard(text);
+                    this.showToast('Daftar pesanan berhasil disalin!');
+                },
+
+                copyStockBroadcast() {
+                    let text = `*STOK LAPTOP READY - BINTANG JAYA KOMPUTER*\n`;
+                    text += `Pusat Grosir & Supplier Dealer Laptop\n\n`;
+
+                    this.laptops.forEach((item, idx) => {
+                        text += `${idx + 1}. *${item.name}* (${item.grade})\n`;
+                        text += `   Specs: ${item.specs}\n`;
+                        text += `   Stok Ready: *${item.stock} Unit*\n\n`;
+                    });
+
+                    text += `*Tanya Harga & Order:* https://wa.me/${this.whatsappNumber}`;
+                    this.copyToClipboard(text);
+                    this.showToast('Daftar seluruh stok disalin untuk broadcast WA!');
+                },
+
+                copyToClipboard(text) {
+                    const dummy = document.createElement("textarea");
+                    document.body.appendChild(dummy);
+                    dummy.value = text;
+                    dummy.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(dummy);
+                },
+
+                // Admin Inventory CRUD
+                saveLaptop() {
+                    if (this.isEditing) {
+                        const index = this.laptops.findIndex(l => l.id === this.form.id);
+                        if (index > -1) {
+                            this.laptops[index] = { ...this.form };
+                            this.showToast('Data laptop berhasil diperbarui!');
+                        }
+                    } else {
+                        const newId = Date.now();
+                        this.laptops.unshift({
+                            ...this.form,
+                            id: newId
+                        });
+                        this.showToast('Laptop baru berhasil ditambahkan ke stok!');
+                    }
+                    this.cancelEdit();
+                },
+
+                editLaptop(laptop) {
+                    this.isEditing = true;
+                    this.form = { ...laptop };
+                },
+
+                cancelEdit() {
+                    this.isEditing = false;
+                    this.form = {
+                        id: null,
+                        name: '',
+                        brand: 'Lenovo',
+                        specs: '',
+                        grade: 'Grade A Mulus',
+                        stock: 5,
+                        notes: ''
+                    };
+                },
+
+                quickAdjustStock(id, delta) {
+                    const laptop = this.laptops.find(l => l.id === id);
+                    if (laptop) {
+                        const newStock = laptop.stock + delta;
+                        if (newStock >= 0) {
+                            laptop.stock = newStock;
+                        }
+                    }
+                },
+
+                deleteLaptop(id) {
+                    if (confirm('Apakah Anda yakin ingin menghapus laptop ini dari stok?')) {
+                        this.laptops = this.laptops.filter(l => l.id !== id);
+                        this.selectedItems = this.selectedItems.filter(i => i.id !== id);
+                        this.showToast('Laptop berhasil dihapus.');
+                    }
+                },
+
+                resetToDefaultData() {
+                    if (confirm('Kembalikan stok ke data awal (contoh)? Perubahan Anda akan direset.')) {
+                        localStorage.removeItem('bj_laptop_inventory');
+                        location.reload();
+                    }
+                }
+            };
+        }
+    </script>
+
+</body>
+</html>
+
