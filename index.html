@@ -116,6 +116,7 @@
                             class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5">
                             <i class="fa-solid fa-user-shield"></i>
                             <span>Dashboard <span class="hidden sm:inline">Bos</span></span>
+                            <i x-show="!isBosUnlocked" class="fa-solid fa-lock text-[10px] text-amber-400 ml-0.5"></i>
                         </button>
                     </div>
 
@@ -364,9 +365,15 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button 
-                        @click="openSettingsModal = true"
+                        @click="openSettings()"
                         class="bg-dark-input hover:bg-dark-hover text-gray-200 border border-dark-border px-3.5 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2">
                         <i class="fa-solid fa-gears text-brand-500"></i> Set No. WA (<span x-text="whatsappNumber"></span>)
+                    </button>
+                    <button 
+                        @click="lockBosMode()" 
+                        class="bg-dark-input hover:bg-dark-hover text-amber-400 border border-dark-border px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"
+                        title="Kunci Kembali Mode Bos">
+                        <i class="fa-solid fa-lock"></i> Kunci
                     </button>
                     <button 
                         @click="resetToDefaultData()" 
@@ -616,19 +623,69 @@
                 <label class="block text-xs font-medium text-gray-400 mb-1">Nomor WhatsApp Admin / Bos</label>
                 <input 
                     type="text" 
-                    x-model="whatsappNumber" 
-                    placeholder="Contoh: 6281234567890" 
+                    x-model="whatsappInput" 
+                    placeholder="Contoh: 081234567890 atau 6281234567890" 
                     class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none">
-                <p class="text-[11px] text-gray-500 mt-1">Gunakan format internasional tanpa tanda + (contoh: 6281234567890).</p>
+                <p class="text-[11px] text-gray-400 mt-1.5">Bisa pakai awalan <span class="text-brand-400 font-mono">08...</span>, <span class="text-brand-400 font-mono">+62...</span>, atau <span class="text-brand-400 font-mono">62...</span>. Sistem akan otomatis merapikan formatnya.</p>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
                 <button 
                     @click="openSettingsModal = false" 
                     class="px-4 py-2 rounded-xl bg-dark-input border border-dark-border text-gray-300 text-xs font-semibold">
-                    Selesai
+                    Batal
+                </button>
+                <button 
+                    @click="saveWhatsAppNumber()" 
+                    class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-md flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Nomor
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- PIN Security Modal for Bos Mode -->
+    <div 
+        x-show="isPinModalOpen" 
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        x-cloak>
+        <div class="bg-dark-card border border-brand-900/60 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative overflow-hidden">
+            <div class="w-12 h-12 rounded-2xl bg-brand-600/20 text-brand-500 border border-brand-500/30 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <div class="text-center">
+                <h3 class="text-base font-bold text-white">Proteksi Dashboard Bos</h3>
+                <p class="text-xs text-gray-400 mt-1">Masukkan PIN Keamanan untuk mengelola stok & nomor WhatsApp.</p>
+            </div>
+
+            <form @submit.prevent="verifyPin()" class="space-y-3">
+                <div>
+                    <input 
+                        type="password" 
+                        x-model="pinInput" 
+                        placeholder="Masukkan PIN (6 Digit)" 
+                        maxlength="6"
+                        required
+                        autofocus
+                        class="w-full bg-dark-input border border-dark-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-3.5 py-2.5 text-center text-lg tracking-widest text-white outline-none font-mono">
+                    <p x-show="pinError" x-text="pinError" class="text-xs text-red-400 mt-1.5 text-center font-medium"></p>
+                </div>
+
+                <div class="flex gap-2 pt-1">
+                    <button 
+                        type="button"
+                        @click="isPinModalOpen = false" 
+                        class="flex-1 py-2.5 rounded-xl bg-dark-input border border-dark-border text-gray-300 text-xs font-semibold hover:bg-dark-hover transition">
+                        Batal
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="flex-1 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-lg glow-red-sm">
+                        Masuk Mode Bos
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -647,10 +704,18 @@
             return {
                 currentTab: 'dealer', // 'dealer' or 'admin'
                 whatsappNumber: '6281234567890', // Default phone number
+                whatsappInput: '',
                 openSettingsModal: false,
                 searchQuery: '',
                 filterBrand: '',
                 filterGrade: '',
+
+                // Security & PIN state
+                isPinModalOpen: false,
+                isBosUnlocked: false,
+                pinInput: '',
+                correctPin: '868789',
+                pinError: '',
 
                 toast: {
                     show: false,
@@ -754,13 +819,10 @@
                     if (savedWA) {
                         this.whatsappNumber = savedWA;
                     }
+                    this.whatsappInput = this.whatsappNumber;
 
                     this.$watch('laptops', (val) => {
                         localStorage.setItem('bj_laptop_inventory', JSON.stringify(val));
-                    });
-
-                    this.$watch('whatsappNumber', (val) => {
-                        localStorage.setItem('bj_wa_number', val);
                     });
                 },
 
@@ -772,9 +834,60 @@
                     }, 3000);
                 },
 
-                // Switch to admin view
+                // Switch to admin view with PIN check
                 switchToAdmin() {
-                    this.currentTab = 'admin';
+                    if (this.isBosUnlocked) {
+                        this.currentTab = 'admin';
+                    } else {
+                        this.pinInput = '';
+                        this.pinError = '';
+                        this.isPinModalOpen = true;
+                    }
+                },
+
+                verifyPin() {
+                    if (this.pinInput === this.correctPin) {
+                        this.isBosUnlocked = true;
+                        this.isPinModalOpen = false;
+                        this.currentTab = 'admin';
+                        this.showToast('Akses Dashboard Bos Berhasil!');
+                    } else {
+                        this.pinError = 'PIN salah! Silakan periksa kembali.';
+                    }
+                },
+
+                lockBosMode() {
+                    this.isBosUnlocked = false;
+                    this.currentTab = 'dealer';
+                    this.showToast('Dashboard Bos berhasil dikunci kembali.');
+                },
+
+                // Auto-clean & format WhatsApp phone number
+                cleanPhoneNumber(num) {
+                    if (!num) return '';
+                    let cleaned = num.replace(/\D/g, ''); // Hapus semua karakter non-angka
+                    if (cleaned.startsWith('0')) {
+                        cleaned = '62' + cleaned.substring(1);
+                    }
+                    return cleaned;
+                },
+
+                openSettings() {
+                    this.whatsappInput = this.whatsappNumber;
+                    this.openSettingsModal = true;
+                },
+
+                saveWhatsAppNumber() {
+                    const cleaned = this.cleanPhoneNumber(this.whatsappInput);
+                    if (!cleaned || cleaned.length < 9) {
+                        this.showToast('Nomor WA tidak valid! Periksa kembali.');
+                        return;
+                    }
+                    this.whatsappNumber = cleaned;
+                    this.whatsappInput = cleaned;
+                    localStorage.setItem('bj_wa_number', cleaned);
+                    this.openSettingsModal = false;
+                    this.showToast('Nomor WhatsApp Bos berhasil diperbarui!');
                 },
 
                 // Filters
@@ -983,4 +1096,3 @@
 
 </body>
 </html>
-
